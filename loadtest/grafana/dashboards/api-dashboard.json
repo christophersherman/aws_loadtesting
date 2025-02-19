@@ -1,0 +1,27 @@
+{
+    "dashboard": {
+      "title": "API Performance",
+      "panels": [
+        {
+          "title": "Requests & Errors",
+          "type": "graph",
+          "targets": [{
+            "expr": "vegeta_rps",
+            "legendFormat": "RPS"
+          },{
+            "expr": "vegeta_errors",
+            "legendFormat": "Errors"
+          }]
+        },
+        {
+          "title": "Latency",
+          "type": "graph",
+          "targets": [{
+            "expr": "vegeta_latency_ms",
+            "legendFormat": "Latency (ms)"
+          }]
+        }
+      ]
+    }
+  }
+  
