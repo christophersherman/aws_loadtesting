@@ -144,7 +144,7 @@ resource "aws_instance" "load_tester" {
             apt-get install -y docker.io docker-compose
             
             # Clone configs
-            git clone https://github.com/your-repo/loadtest.git /loadtest
+            git clone https://github.com/christophersherman/aws_loadtesting.git /loadtest
             cd /loadtest
             
             # Set API endpoint
