@@ -1,31 +1,48 @@
 {
-  "dashboard": {
-    "title": "API Performance",
-    "panels": [
-      {
-        "title": "Requests & Errors",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "vegeta_rps",
-            "legendFormat": "RPS"
-          },
-          {
-            "expr": "vegeta_errors",
-            "legendFormat": "Errors"
-          }
-        ]
-      },
-      {
-        "title": "Latency",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "vegeta_latency_ms",
-            "legendFormat": "Latency (ms)"
-          }
-        ]
-      }
-    ]
-  }
+  "title": "API Performance",
+  "tags": ["vegeta", "performance"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Requests Per Second (RPS)",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "vegeta_rps",
+          "legendFormat": "RPS",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Latency (ms)",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "vegeta_latency_ms",
+          "legendFormat": "Latency",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Errors",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "vegeta_errors",
+          "legendFormat": "Errors",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 26,
+  "version": 1
 }

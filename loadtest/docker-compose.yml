@@ -8,9 +8,10 @@ services:
     depends_on:
       - prometheus
       - grafana
-    network_mode: host
-    # Ensure your Vegeta container starts with the appropriate Prometheus exporter flag,
-    # for example: CMD ["./ramp.sh", "-prometheus-addr=0.0.0.0:8000"]
+    ports:
+      - "8000:8000"  # Expose Prometheus metrics port
+    networks:
+      - vegeta-net
 
   prometheus:
     image: prom/prometheus:latest
@@ -21,6 +22,8 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.enable-lifecycle'
+    networks:
+      - vegeta-net
 
   grafana:
     image: grafana/grafana:latest
@@ -33,3 +36,8 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=true
     ports:
       - "3000:3000"
+    networks:
+      - vegeta-net
+
+networks:
+  vegeta-net:

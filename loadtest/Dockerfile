@@ -17,4 +17,5 @@ COPY vegeta-targets.txt /app/
 COPY ramp.sh /app/
 
 WORKDIR /app
+RUN chmod +x ramp.sh
 CMD ["./ramp.sh"]
