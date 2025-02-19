@@ -145,7 +145,7 @@ resource "aws_instance" "load_tester" {
             
             # Clone configs
             git clone https://github.com/christophersherman/aws_loadtesting.git /loadtest
-            cd /loadtest
+            cd /loadtest/loadtest
             
             # Set API endpoint
             echo "GET http://${aws_instance.api_server.private_ip}:8000/test" > vegeta-targets.txt
