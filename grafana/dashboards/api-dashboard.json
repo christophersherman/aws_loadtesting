@@ -5,7 +5,6 @@
   "editable": true,
   "refresh": "5s",
   "panels": [
-    // Header Panel
     {
       "type": "text",
       "title": "Live Load Test Dashboard",
@@ -13,18 +12,28 @@
       "content": "# 🚀 API Performance Metrics\n**Current Test Phase:** `${phases}`"
     },
     
-    // Key Metrics Row
     {
       "type": "stat",
       "title": "Current RPS",
-      "gridPos": {"x":0,"y":2,"w":3,"h":4},
-      "targets": [{"expr": "vegeta_rps", "format": "time_series"}],
-      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}}},
-      "thresholds": {"mode": "absolute", "steps": [
-        {"value": null, "color": "green"},
-        {"value": 400, "color": "red"}
-      ]}
+      "targets": [{
+        "expr": "rate(vegeta_requests_total[1m])",
+        "format": "time_series"
+      }]
     },
+    {
+      "type": "heatmap",
+      "title": "Latency Distribution Over Time",
+      "targets": [{
+        "expr": "histogram_quantile(0.99, sum(rate(vegeta_latency_hist_ms_bucket[1m])) by (le))"
+      }]
+    },
+    {
+      "type": "gauge",
+      "title": "Success Rate",
+      "targets": [{
+        "expr": "sum(rate(vegeta_status_codes{code=~'2..'}[1m])) / sum(rate(vegeta_status_codes[1m])) * 100"
+      }]
+    }
     {
       "type": "stat",
       "title": "P99 Latency",
@@ -54,7 +63,6 @@
       "unit": "percent"
     },
 
-    // Main Time Series
     {
       "type": "graph",
       "title": "Throughput Analysis",
@@ -78,7 +86,6 @@
       "unit": "ms"
     },
 
-    // System Health
     {
       "type": "heatmap",
       "title": "Latency Distribution Over Time",
@@ -102,7 +109,6 @@
       ]}
     },
 
-    // Error Breakdown
     {
       "type": "piechart",
       "title": "Status Code Distribution",

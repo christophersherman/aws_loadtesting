@@ -157,11 +157,7 @@ resource "aws_instance" "load_tester" {
         # Start services with correct context
         cd loadtest
         docker-compose -f docker-compose.yml up -d --build
-
-        # Wait for Grafana (more resilient check)
-        until curl -s http://localhost:3000/api/health; do
-          echo "Waiting for Grafana..."
-          sleep 5
+        
         done
         EOF
 

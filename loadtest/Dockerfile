@@ -12,6 +12,7 @@ RUN wget https://github.com/tsenart/vegeta/releases/download/v12.12.0/vegeta_12.
     && mv vegeta /usr/bin/vegeta
 
 RUN pip3 install prometheus-client
+RUN pip3 install psutil
 
 COPY vegeta-targets.txt /app/
 COPY ramp.sh /app/

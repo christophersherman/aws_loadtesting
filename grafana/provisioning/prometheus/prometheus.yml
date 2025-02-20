@@ -1,6 +1,8 @@
-global:
-  scrape_interval: 5s
 scrape_configs:
   - job_name: 'vegeta'
+    scrape_interval: 5s
     static_configs:
       - targets: ['vegeta:8000']
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node_exporter:9100']

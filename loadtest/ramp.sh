@@ -1,33 +1,31 @@
 #!/bin/bash
-# Metrics setup with additional system monitoring
-python3 - <<'EOF' &
-from prometheus_client import start_http_server, Gauge, Histogram
-import time, subprocess, json, psutil
+# CHANGED: Added Counter import and fixed label handling
+from prometheus_client import start_http_server, Gauge, Histogram, Counter
 
-start_http_server(8000)
+# CHANGED: Added buckets for histogram
+latency_hist = Histogram('vegeta_latency_hist_ms', 'Request latency histogram', buckets=[100, 200, 500, 1000, 2000])
 
-# Application metrics
-latency = Gauge('vegeta_latency_ms', 'Average latency', ['percentile'])
-rps = Gauge('vegeta_rps', 'Requests per second')
-errors = Gauge('vegeta_errors', 'Error count', ['status'])
+# CHANGED: Fixed Counter implementation
 req_count = Counter('vegeta_requests_total', 'Total requests')
-status_codes = Gauge('vegeta_status_codes', 'Status code count', ['code'])
-
-# System metrics
-cpu_usage = Gauge('system_cpu_usage', 'CPU usage %')
-mem_usage = Gauge('system_mem_usage', 'Memory usage %')
 
 def collect_metrics():
     try:
+        # ADDED: Track duration of attack
         result = subprocess.run(
+            ["vegeta", "attack", "-duration=1s", "-rate=1", "-targets=vegeta-targets.txt"],
+            capture_output=True, text=True
+        )
+        
+        # ADDED: Parse results properly
+        report = subprocess.run(
             ["vegeta", "report", "-type=json", "results.bin"],
             capture_output=True, text=True
         )
-        data = json.loads(result.stdout)
+        data = json.loads(report.stdout)
         
-        # Latency percentiles
-        for p in ['50', '90', '95', '99']:
-            latency.labels(percentile=p).set(data['latencies'][f'{p}th'] / 1e6)
+        # CHANGED: Record histogram values
+        for latency in data['latencies']['values']:
+            latency_hist.observe(latency / 1e6)
         
         # Status codes
         for code, count in data['status_codes'].items():
@@ -68,7 +66,11 @@ PHASES=(
     "2m:50"
 )
 
+current_phase = Gauge('vegeta_current_phase', 'Current load test phase', ['phase_name'])
+
 for phase in "${PHASES[@]}"; do
+    phase_name=$(echo $phase | cut -d':' -f2)
+    current_phase.labels(phase_name=phase_name).set(1)
     duration=$(echo $phase | cut -d':' -f1)
     rate=$(echo $phase | cut -d':' -f2)
     
@@ -82,6 +84,7 @@ for phase in "${PHASES[@]}"; do
     
     vegeta report results.bin > reports/$(date +%s).txt
     echo "🧪 Phase completed. Cooling down for 30s..."
+    current_phase.labels(phase_name=phase_name).set(0)
     sleep 30
 done
 
