@@ -1,7 +1,6 @@
 global:
   scrape_interval: 5s
-
 scrape_configs:
   - job_name: 'vegeta'
     static_configs:
-      - targets: ['vegeta:8000']  # Use Docker service name
+      - targets: ['vegeta:8000']
