@@ -1,127 +1,117 @@
 {
-  "title": "Server Performance Analysis",
-  "tags": ["load-test", "presentation"],
+  "title": "Live Load Test Dashboard",
+  "tags": ["load-test", "performance"],
   "timezone": "browser",
   "editable": true,
   "refresh": "5s",
   "panels": [
     {
       "type": "text",
-      "title": "Live Load Test Dashboard",
+      "title": "header",
       "gridPos": {"x":0,"y":0,"w":24,"h":2},
-      "content": "# 🚀 API Performance Metrics\n**Current Test Phase:** `${phases}`"
-    },
-    
-    {
-      "type": "stat",
-      "title": "Current RPS",
-      "targets": [{
-        "expr": "rate(vegeta_requests_total[1m])",
-        "format": "time_series"
-      }]
+      "content": "# 🚀 API Performance Metrics\n**Current Test Phase:** ${phases}",
+      "transparent": true
     },
     {
-      "type": "heatmap",
-      "title": "Latency Distribution Over Time",
-      "targets": [{
-        "expr": "histogram_quantile(0.99, sum(rate(vegeta_latency_hist_ms_bucket[1m])) by (le))"
-      }]
-    },
-    {
-      "type": "gauge",
-      "title": "Success Rate",
-      "targets": [{
-        "expr": "sum(rate(vegeta_status_codes{code=~'2..'}[1m])) / sum(rate(vegeta_status_codes[1m])) * 100"
-      }]
-    }
-    {
-      "type": "stat",
-      "title": "P99 Latency",
-      "gridPos": {"x":3,"y":2,"w":3,"h":4},
-      "targets": [{"expr": "vegeta_latency_ms{percentile='99'}", "format": "time_series"}],
-      "unit": "ms"
+      "type": "row",
+      "title": "Core Metrics",
+      "gridPos": {"x":0,"y":1,"w":24,"h":1},
+      "collapsed": false
     },
     {
       "type": "stat",
-      "title": "Errors",
-      "gridPos": {"x":6,"y":2,"w":3,"h":4},
-      "targets": [{"expr": "sum(vegeta_errors)", "format": "time_series"}],
-      "colorMode": "value"
-    },
-    {
-      "type": "stat",
-      "title": "CPU Usage",
-      "gridPos": {"x":9,"y":2,"w":3,"h":4},
-      "targets": [{"expr": "system_cpu_usage", "format": "time_series"}],
-      "unit": "percent"
-    },
-    {
-      "type": "stat",
-      "title": "Memory Usage",
-      "gridPos": {"x":12,"y":2,"w":3,"h":4},
-      "targets": [{"expr": "system_mem_usage", "format": "time_series"}],
-      "unit": "percent"
-    },
-
-    {
-      "type": "graph",
-      "title": "Throughput Analysis",
-      "gridPos": {"x":0,"y":6,"w":12,"h":8},
-      "targets": [
-        {"expr": "vegeta_rps", "legendFormat": "RPS"},
-        {"expr": "rate(vegeta_requests_total[1m])", "legendFormat": "Req Rate"}
-      ],
-      "shadeBelow": true
-    },
-    {
-      "type": "graph",
-      "title": "Latency Distribution",
-      "gridPos": {"x":12,"y":6,"w":12,"h":8},
-      "targets": [
-        {"expr": "vegeta_latency_ms{percentile='50'}", "legendFormat": "P50"},
-        {"expr": "vegeta_latency_ms{percentile='90'}", "legendFormat": "P90"},
-        {"expr": "vegeta_latency_ms{percentile='95'}", "legendFormat": "P95"},
-        {"expr": "vegeta_latency_ms{percentile='99'}", "legendFormat": "P99"}
-      ],
-      "unit": "ms"
-    },
-
-    {
-      "type": "heatmap",
-      "title": "Latency Distribution Over Time",
-      "gridPos": {"x":0,"y":14,"w":12,"h":8},
-      "targets": [{"expr": "histogram_quantile(0.95, sum(rate(vegeta_latency_ms_bucket[1m])) by (le))"}]
-    },
-    {
-      "type": "gauge",
-      "title": "Success Rate",
-      "gridPos": {"x":12,"y":14,"w":6,"h":6},
+      "title": "Success Rate (%)",
+      "gridPos": {"x":0,"y":2,"w":3,"h":4},
       "targets": [{
         "expr": "sum(vegeta_status_codes{code=~'2..'}) / sum(vegeta_status_codes) * 100",
-        "legendFormat": "Success Rate"
+        "format": "time_series"
       }],
       "max": 100,
-      "min": 0,
-      "thresholds": {"steps": [
-        {"value": 99.9, "color": "green"},
-        {"value": 99, "color": "yellow"},
-        {"value": 0, "color": "red"}
-      ]}
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {"value": 99.9, "color": "green"},
+          {"value": 99, "color": "yellow"},
+          {"value": 95, "color": "red"}
+        ]
+      },
+      "interval": "1m"
     },
-
+    {
+      "type": "stat",
+      "title": "Error Rate (/s)",
+      "gridPos": {"x":3,"y":2,"w":3,"h":4},
+      "targets": [{
+        "expr": "sum(rate(vegeta_status_codes{code!~'2..'}[1m]))",
+        "format": "time_series"
+      }],
+      "colorMode": "value",
+      "graphMode": "area"
+    },
+    {
+      "type": "graph",
+      "title": "Request Rate (/s)",
+      "gridPos": {"x":6,"y":2,"w":6,"h":8},
+      "targets": [{
+        "expr": "rate(vegeta_requests_total[1m])",
+        "legendFormat": "Request Rate"
+      }],
+      "steppedLine": false,
+      "fill": 1
+    },
+    {
+      "type": "graph",
+      "title": "RPS (Requests Per Second)",
+      "gridPos": {"x":12,"y":2,"w":6,"h":8},
+      "targets": [{
+        "expr": "vegeta_rps",
+        "legendFormat": "RPS"
+      }],
+      "steppedLine": false,
+      "fill": 1
+    },
+    {
+      "type": "row",
+      "title": "System Metrics",
+      "gridPos": {"x":0,"y":10,"w":24,"h":1},
+      "collapsed": false
+    },
+    {
+      "type": "graph",
+      "title": "CPU Usage (%)",
+      "gridPos": {"x":0,"y":11,"w":12,"h":8},
+      "targets": [{
+        "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode='idle'}[1m])) * 100)",
+        "legendFormat": "CPU Usage"
+      }],
+      "yAxis": {"max": 100},
+      "unit": "percent"
+    },
+    {
+      "type": "graph",
+      "title": "Memory Usage (%)",
+      "gridPos": {"x":12,"y":11,"w":12,"h":8},
+      "targets": [{
+        "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+        "legendFormat": "Memory Usage"
+      }],
+      "yAxis": {"max": 100},
+      "unit": "percent"
+    },
     {
       "type": "piechart",
       "title": "Status Code Distribution",
-      "gridPos": {"x":18,"y":14,"w":6,"h":6},
+      "gridPos": {"x":0,"y":19,"w":12,"h":8},
       "targets": [{
         "expr": "sum(vegeta_status_codes) by (code)"
-      }]
+      }],
+      "pieType": "donut"
     }
   ],
   "templating": {
     "list": [{
       "name": "phases",
-      "query": "label_values(vegeta_rps, phase)",
+      "query": "label_values(vegeta_current_phase, phase_name)",
       "refresh": 2,
       "type": "query"
     }]
@@ -129,11 +119,12 @@
   "annotations": {
     "list": [{
       "name": "Test Phases",
-      "target": {
-        "expr": "vegeta_rps",
-        "legendFormat": "{{phase}}"
-      },
-      "type": "tags"
+      "datasource": "Prometheus",
+      "expr": "vegeta_current_phase == 1",
+      "title": "{{phase_name}}",
+      "tags": ["phase"]
     }]
-  }
+  },
+  "schemaVersion": 36,
+  "version": 1
 }
