@@ -2,3 +2,4 @@
 venv/
 *.tfstate
 *.lock.hcl
+*.tfstate.backup

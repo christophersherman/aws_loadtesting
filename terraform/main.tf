@@ -138,31 +138,32 @@ resource "aws_instance" "load_tester" {
   key_name      = aws_key_pair.load_test_key.key_name
 
   user_data = <<-EOF
-      #!/bin/bash
-      set -ex
-      apt-get update
-      apt-get install -y docker.io docker-compose-plugin
+        #!/bin/bash
+        set -ex
+        # Install dependencies
+        apt-get update
+        apt-get install -y docker.io docker-compose
+        # Clone repo (ensure correct structure)
+        git clone https://github.com/christophersherman/aws_loadtesting.git /t3_test
+        
 
-      # Clone repo with correct structure
-      git clone https://github.com/christophersherman/aws_loadtesting.git /t3_test
-      cd /t3_test/loadtest  # Enter loadtest directory where docker-compose lives
+        echo "GET http://${aws_instance.api_server.private_ip}:8000/test" > /t3_test/loadtest/vegeta-targets.txt
 
-      # Set API endpoint 
-      echo "GET http://${aws_instance.api_server.private_ip}:8000/test" > vegeta-targets.txt
+        # Fix permissions
+        cd /t3_test
+        chmod 644 grafana/provisioning/prometheus/prometheus.yml
+        chmod 644 grafana/provisioning/datasources/prometheus.yml
 
-      # Ensure permissions
-      chmod 644 ../grafana/provisioning/prometheus/prometheus.yml
-      chmod 644 ../grafana/provisioning/datasources/prometheus.yml
+        # Start services with correct context
+        cd loadtest
+        docker-compose -f docker-compose.yml up -d --build
 
-      # Start services from loadtest directory
-      docker-compose -f docker-compose.yml up -d --build
-
-      # Wait for Grafana
-      until curl -s http://localhost:3000/api/health; do
-        echo "Waiting for Grafana..."
-        sleep 5
-      done
-      EOF
+        # Wait for Grafana (more resilient check)
+        until curl -s http://localhost:3000/api/health; do
+          echo "Waiting for Grafana..."
+          sleep 5
+        done
+        EOF
 
   tags = {
     Name = "Load-Tester"
