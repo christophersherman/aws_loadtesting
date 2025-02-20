@@ -158,7 +158,6 @@ resource "aws_instance" "load_tester" {
         cd loadtest
         docker-compose -f docker-compose.yml up -d --build
         
-        done
         EOF
 
   tags = {
